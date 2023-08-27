@@ -831,7 +831,7 @@ function em_application_tech_send_invoice($currency, $amount, $name, $email, $co
                                                                     <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;margin-top:16px;margin-bottom:24px"><small class="text-muted" style="font-size:86%;font-weight:normal;color:#b3b3b5">Use this link below to try again, if you encountered <br />any issue while trying to make the payment.</small><br>
                                                                     </p>
                                                                     <td class="font_default" style="padding:12px 24px;font-family:Helvetica,Arial,sans-serif;font-size:16px;mso-line-height-rule:exactly;text-align:center;vertical-align:middle;-webkit-border-radius:4px;border-radius:4px;background-color:#666">
-                                                                        <a href="<?php echo get_site_url() . '/paystackinvoice/?code=' . $code; ?>" style="display:block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#fff;font-weight:bold;text-align:center">
+                                                                        <a href="<?php echo get_site_url() . '/everydaymoneyinvoice/?code=' . $code; ?>" style="display:block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#fff;font-weight:bold;text-align:center">
                                                                             <span style="text-decoration:none;color:#fff;text-align:center;display:block">Try Again</span>
                                                                         </a>
                                                                     </td>
@@ -3124,7 +3124,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                   <div class="toolbar hidden-print">
                      <div class="text-end">
                         <button type="button" onClick="printInvoice();" class="btn btn-dark"><i class="fa fa-print"></i> Print</button>
-                        <!-- <button type="button" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Export as PDF</button> -->
+                        <a href="/" class="btn"><i class="fa fa-home"></i> Home</a>
                      </div>
                      <hr>
                   </div>
@@ -3216,6 +3216,33 @@ function getInvoiceReceipt($verification_body, $payment_array){
     </script>
 </html>
 <?php
+}
+
+
+add_action('init', 'everydaymoneyinvoice_init');
+function everydaymoneyinvoice_init()
+{
+    add_rewrite_rule('^everydaymoneyinvoice$', 'index.php?everydaymoney_form_stats=true', 'top');
+}
+
+// But WordPress has a whitelist of variables it allows, so we must put it on that list
+add_action('query_vars', 'everydaymoney_forms_query_vars');
+function everydaymoney_forms_query_vars($query_vars)
+{
+    $query_vars[] = 'everydaymoney_form_stats';
+    return $query_vars;
+}
+
+// If this is done, we can access it later
+// This example checks very early in the process:
+// if the variable is set, we include our page and stop execution after it
+add_action('parse_request', 'everydaymoneyform_parse_request');
+function everydaymoneyform_parse_request(&$wp)
+{
+    if (array_key_exists('everydaymoney_form_stats', $wp->query_vars)) {
+        include dirname(__FILE__) . '/includes/everydaymoney-invoice.php';
+        exit();
+    }
 }
 
 

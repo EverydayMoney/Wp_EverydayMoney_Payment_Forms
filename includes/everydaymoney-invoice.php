@@ -4,7 +4,7 @@
 require_once ABSPATH.'wp-load.php';
 
 $code = @$_GET['code'];
-function kkd_format_metadata($data)
+function everydaymoney_format_metadata($data)
 {
     $new = json_decode($data);
     $text = '';
@@ -73,7 +73,7 @@ if (array_key_exists("0", $record)) {
        <label class="label inline">Amount:</label>
        <strong><?php echo $currency.number_format($dbdata->amount); ?></strong>
       </div>
-        <?php echo kkd_format_metadata($dbdata->metadata); ?>
+        <?php echo everydaymoney_format_metadata($dbdata->metadata); ?>
                             
       <div class="span12 unit">
        <label class="label inline">Date:</label>
