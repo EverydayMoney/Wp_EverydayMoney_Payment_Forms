@@ -309,7 +309,6 @@ function EverydayMoneyConfig() {
         //   );
         //   return false;
         // }
-        console.log("Yaeh");
         if (!validateEmail(email)) {
           $(this)
             .find("#emf-email")
@@ -379,8 +378,9 @@ function EverydayMoneyConfig() {
             success: function (data) {
               $.unblockUI();
               if (!data.isError) {
-                  var obj = new EverydayMoneyConfig();
-                  if(obj.liveMode){
+                  // var obj = new EverydayMoneyConfig();
+                  // console.log({obj});
+                  if(window.EVERYDAYMONEY_SETTINGS.liveMode){
                     window.location.href = `https://d1cwe56lizu154.cloudfront.net?transactionRef=${data.result.transactionRef}`;
                   }else{
                     window.location.href = `https://dtu039g57sbfd.cloudfront.net/?transactionRef=${data.result.transactionRef}`;

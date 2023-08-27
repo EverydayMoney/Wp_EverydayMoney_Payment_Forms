@@ -2687,7 +2687,6 @@ function em_application_tech_submit_action()
 
     $fixedmetadata = json_decode(json_encode($fixedmetadata, JSON_NUMERIC_CHECK), true);
     $fixedmetadata = array_merge($untouchedmetadata, $fixedmetadata);
-
     /*
         * Array with parameters for API interaction
         */
@@ -2699,7 +2698,7 @@ function em_application_tech_submit_action()
         "amount" => $originalamount,
         "currency" => "NGN",
         "wallet" => esc_attr(get_option('emWallet', 'default')),
-        "inclusive" => esc_attr(get_option('emChargeInclusive', 'yes')) == "yes" ? true : false,
+        "inclusive" => esc_attr(get_option('emChargeInclusive')) == "yes" ? true : false,
         "email" => strip_tags($_POST["emf-pemail"], ""),
     ];
 
@@ -2735,14 +2734,14 @@ function em_application_tech_submit_action()
             // Yay!
         } else {
             if(isset($body["error"]) && isset($body["error"]["message"])){
-                wc_add_notice($body["error"]["message"], "error");
+                // Log($body["error"]["message"], "error");
             } else {
-                wc_add_notice("An unknown error ocured, please check your input and try again", "error");
+                // Log("An unknown error ocured, please check your input and try again", "error");
             }
             return;
         }
     } else {
-        wc_add_notice("Connection error.", "error");
+        // Log("Connection error.", "error");
         return;
     }
 
@@ -2809,7 +2808,9 @@ function everydaymoney_form_callback() {
     // Verify the transactionRef against the external API
     $message = null;
     $result = null;
-    $data = null;
+    $payment_array = null;
+    $redirect = null;
+    $verification_body = null;
     if (isset($_GET["transactionRef"])) {
         $transactionRef = $_GET["transactionRef"];
         $mode = esc_attr(get_option('emMode', 'test'));
@@ -2846,12 +2847,14 @@ function everydaymoney_form_callback() {
                         $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
                         $message = $thankyou;
                         $result = "success";
-                    }else{
+                    }else if($verification_body["result"]['status'] === 'success' || 
+                    $verification_body["result"]['status'] === 'completed' ||
+                    $verification_body["result"]['status'] === 'sent'){
                         // $amount = get_post_meta($payment_array->post_id, '_amount', true);
                         // $recur = get_post_meta($payment_array->post_id, '_recur', true);
                         // $currency = get_post_meta($payment_array->post_id, '_currency', true);
                         // $txncharge = get_post_meta($payment_array->post_id, '_txncharge', true);
-                        // $redirect = get_post_meta($payment_array->post_id, '_redirect', true);
+                        $redirect = get_post_meta($payment_array->post_id, '_redirect', true);
                         // $minimum = get_post_meta($payment_array->post_id, '_minimum', true);
                         $usevariableamount = get_post_meta($payment_array->post_id, '_usevariableamount', true);
                         // $variableamount = get_post_meta($payment_array->post_id, '_variableamount', true);
@@ -2909,23 +2912,310 @@ function everydaymoney_form_callback() {
                             if ($sendreceipt == 'yes') {
                                 $decoded = json_decode($payment_array->metadata);
                                 $fullname = $decoded[1]->value;
-                                // em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
-                                // em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+                                em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+                                em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
                             }
                         }
+                    } else {
+                        $message = "Payment is still pending";
+                        $result = "failure";
                     }
                 }
             }
         }
+        // Render HTML based on $result === "success" or "failure"
+        if ($result === "success") {
+            if($redirect){
+                return wp_redirect($redirect);
+            }else{
+                getInvoiceReceipt($verification_body, $payment_array, $message);
+            }
+        } elseif ($result === "failure") {
+            // Render failure HTML
+            echo '<div class="failure-message">' . $message . '</div>';
+        } else {
+            echo '<div class="failure-message">Something went wrong, please try again later</div>';
+        }
+    }else{
+        // TODO: Render: Payment Cancelled
     }
-    // Render HTML based on $result === "success" or "failure"
-    if ($result === "success") {
-        // Render success HTML
-        echo '<div class="success-message">' . $message . '</div>';
-    } elseif ($result === "failure") {
-        // Render failure HTML
-        echo '<div class="failure-message">' . $message . '</div>';
-    }
+}
+
+function getInvoiceReceipt($verification_body, $payment_array){  
+    $currency = get_post_meta($payment_array->post_id, '_currency', true);  
+?>
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>EverydayMoney Invoice</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+      <style type="text/css">
+         body{margin-top:20px;
+         background-color: #f7f7ff;
+         }
+         #invoice {
+         padding: 0px;
+         }
+         .invoice {
+         position: relative;
+         background-color: #FFF;
+         min-height: 680px;
+         padding: 15px
+         }
+         .invoice header {
+         padding: 10px 0;
+         margin-bottom: 20px;
+         border-bottom: 1px solid #0d6efd
+         }
+         .invoice .company-details {
+         text-align: right
+         }
+         .invoice .company-details .name {
+         margin-top: 0;
+         margin-bottom: 0
+         }
+         .invoice .contacts {
+         margin-bottom: 20px
+         }
+         .invoice .invoice-to {
+         text-align: left
+         }
+         .invoice .invoice-to .to {
+         margin-top: 0;
+         margin-bottom: 0
+         }
+         .invoice .invoice-details {
+         text-align: right
+         }
+         .invoice .invoice-details .invoice-id {
+         margin-top: 0;
+         color: #0d6efd
+         }
+         .invoice main {
+         padding-bottom: 50px
+         }
+         .invoice main .thanks {
+         margin-top: -100px;
+         font-size: 2em;
+         margin-bottom: 50px
+         }
+         .invoice main .notices {
+         padding-left: 6px;
+         border-left: 6px solid #0d6efd;
+         background: #e7f2ff;
+         padding: 10px;
+         }
+         .invoice main .notices .notice {
+         font-size: 1.2em
+         }
+         .invoice table {
+         width: 100%;
+         border-collapse: collapse;
+         border-spacing: 0;
+         margin-bottom: 20px
+         }
+         .invoice table td,
+         .invoice table th {
+         padding: 15px;
+         background: #eee;
+         border-bottom: 1px solid #fff
+         }
+         .invoice table th {
+         white-space: nowrap;
+         font-weight: 400;
+         font-size: 16px
+         }
+         .invoice table td h3 {
+         margin: 0;
+         font-weight: 400;
+         color: #0d6efd;
+         font-size: 1.2em
+         }
+         .invoice table .qty,
+         .invoice table .total,
+         .invoice table .unit {
+         text-align: right;
+         font-size: 1.2em
+         }
+         .invoice table .no {
+         color: #fff;
+         font-size: 1.6em;
+         background: #0d6efd
+         }
+         .invoice table .unit {
+         background: #ddd
+         }
+         .invoice table .total {
+         background: #0d6efd;
+         color: #fff
+         }
+         .invoice table tbody tr:last-child td {
+         border: none
+         }
+         .invoice table tfoot td {
+         background: 0 0;
+         border-bottom: none;
+         white-space: nowrap;
+         text-align: right;
+         padding: 10px 20px;
+         font-size: 1.2em;
+         border-top: 1px solid #aaa
+         }
+         .invoice table tfoot tr:first-child td {
+         border-top: none
+         }
+         .card {
+         position: relative;
+         display: flex;
+         flex-direction: column;
+         min-width: 0;
+         word-wrap: break-word;
+         background-color: #fff;
+         background-clip: border-box;
+         border: 0px solid rgba(0, 0, 0, 0);
+         border-radius: .25rem;
+         margin-bottom: 1.5rem;
+         box-shadow: 0 2px 6px 0 rgb(218 218 253 / 65%), 0 2px 6px 0 rgb(206 206 238 / 54%);
+         }
+         .invoice table tfoot tr:last-child td {
+         color: #0d6efd;
+         font-size: 1.4em;
+         border-top: 1px solid #0d6efd
+         }
+         .invoice table tfoot tr td:first-child {
+         border: none
+         }
+         .invoice footer {
+         width: 100%;
+         text-align: center;
+         color: #777;
+         border-top: 1px solid #aaa;
+         padding: 8px 0
+         }
+         @media print {
+         .invoice {
+         font-size: 11px !important;
+         overflow: hidden !important
+         }
+         .invoice footer {
+         position: absolute;
+         bottom: 10px;
+         page-break-after: always
+         }
+         .invoice>div:last-child {
+         page-break-before: always
+         }
+         }
+         .invoice main .notices {
+         padding-left: 6px;
+         border-left: 6px solid #0d6efd;
+         background: #e7f2ff;
+         padding: 10px;
+         }
+      </style>
+   </head>
+   <body>
+      <div class="container">
+         <div class="card">
+            <div class="card-body">
+               <div id="invoice">
+                  <div class="toolbar hidden-print">
+                     <div class="text-end">
+                        <button type="button" onClick="printInvoice();" class="btn btn-dark"><i class="fa fa-print"></i> Print</button>
+                        <!-- <button type="button" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Export as PDF</button> -->
+                     </div>
+                     <hr>
+                  </div>
+                  <div class="invoice overflow-auto">
+                     <div style="min-width: 600px">
+                        <header>
+                           <div class="row">
+                              <div class="col">
+                                 <a href="javascript:;">
+                                 <img src="assets/images/logo-icon.png" width="80" alt>
+                                 </a>
+                              </div>
+                              <div class="col company-details">
+                                 <h2 class="name">
+                                 <?php echo $payment_array->email; ?>
+                                 </h2>
+                                 <div><?php echo $payment_array->ourRef; ?></div>
+                                 <div><?php echo $payment_array->transactionRef; ?></div>
+                              </div>
+                           </div>
+                        </header>
+                        <main>
+                           <div class="row contacts">
+                              <div class="col invoice-to">
+                                 <!-- <div class="text-gray-light">In Respect Of:</div> -->
+                              </div>
+                              <div class="col invoice-details">
+                                 <h1 class="invoice-id">RECEIPT</h1>
+                                 <div class="date">Date: <?php echo $verification_body['result']['paidAt']; ?></div>
+                              </div>
+                           </div>
+                           <table>
+                              <thead>
+                                 <tr>
+                                    <th>#</th>
+                                    <th class="text-left">DESCRIPTION</th>
+                                    <th class="text-right">VALUE</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                              <?php
+                                    if($payment_array->metadata){
+                                        echo '<div class="address">' . $payment->email .'</div>';
+                                        $fixedmetadata = $payment_array->metadata;
+                                        $nmeta = json_decode($fixedmetadata);
+                                        $increment = 1;
+                                        foreach ($nmeta as $nkey => $nvalue) {
+                                            echo '<tr>';
+                                            echo '<td class="no">' . $increment++ . '</td>';
+                                            echo '<td class="text-left"><h3>' . $nvalue->display_name . '</h3></td>';
+                                            echo '<td class="total">' . $nvalue->value .'</td>';
+                                            echo '</tr>';
+                                        }
+                                    }
+                                  ?>
+                              </tbody>
+                           </table>
+
+                           <table>
+                           <tfoot>
+                                 <tr>
+                                    <td colspan="2"></td>
+                                    <td colspan="2">AMOUNT RECEIVED</td>
+                                    <td><?php echo $currency . ' ' . number_format($verification_body['result']['settledAmount'] / 100) ?></td>
+                                 </tr>
+                              </tfoot>
+                           </table>
+                           <!-- <div class="notices">
+                              <div>NOTICE:</div>
+                              <div class="notice">A finance charge of 1.5% will be made on unpaid balances after 30 days.</div>
+                           </div> -->
+                        </main>
+                        <footer>Invoice was created on <?php echo get_site_url(); ?> and is valid without the signature and seal.</footer>
+                     </div>
+                     <div></div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
+      <script type="text/javascript"></script>
+   </body>
+   <script type="text/javascript">
+        function printInvoice() {
+            window.print();
+        }
+    </script>
+</html>
+<?php
 }
 
 
@@ -2999,7 +3289,7 @@ function everydaymoney_forms_webhook() {
                     }else{
                         // $amount = get_post_meta($payment_array->post_id, '_amount', true);
                         // $recur = get_post_meta($payment_array->post_id, '_recur', true);
-                        // $currency = get_post_meta($payment_array->post_id, '_currency', true);
+                        $currency = get_post_meta($payment_array->post_id, '_currency', true);
                         // $txncharge = get_post_meta($payment_array->post_id, '_txncharge', true);
                         // $redirect = get_post_meta($payment_array->post_id, '_redirect', true);
                         // $minimum = get_post_meta($payment_array->post_id, '_minimum', true);
@@ -3061,8 +3351,8 @@ function everydaymoney_forms_webhook() {
                             if ($sendreceipt == 'yes') {
                                 $decoded = json_decode($payment_array->metadata);
                                 $fullname = $decoded[1]->value;
-                                // em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
-                                // em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+                                em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+                                em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
                             }
                         }
                     }
