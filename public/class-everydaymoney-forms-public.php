@@ -894,7 +894,7 @@ function em_application_tech_send_invoice($currency, $amount, $name, $email, $co
     $headers = "From: " . $website . "<$admin_email>" . "\r\n";
     wp_mail($user_email, $email_subject, $message, $headers);
 }
-function em_application_tech_send_receipt($id, $currency, $amount, $name, $email, $code, $metadata)
+function em_application_tech_send_receipt($id, $currency, $amount, $name, $email, $code, $metadata, $transactionRef)
 {
     //  echo date('F j,Y'); 
     // error_log(print_r("Sending reciept", TRUE)); 
@@ -1017,7 +1017,7 @@ function em_application_tech_send_receipt($id, $currency, $amount, $name, $email
                                                 </tr>
                                                 <tr>
                                                     <td class="font_default" style="padding:12px 24px;font-family:Helvetica,Arial,sans-serif;font-size:16px;mso-line-height-rule:exactly;text-align:center;vertical-align:middle;-webkit-border-radius:4px;border-radius:4px;background-color:#666">
-                                                        <a href="<?php echo get_permalink(strip_tags($id, "")) . '&transactionRef=' . $code; ?>" style="display:block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#fff;font-weight:bold;text-align:center">
+                                                        <a href="<?php echo get_permalink(strip_tags($id, "")) . '&transactionRef=' . $transactionRef; ?>" style="display:block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#fff;font-weight:bold;text-align:center">
                                                             <span style="text-decoration:none;color:#fff;text-align:center;display:block">View Receipt</span>
                                                         </a>
                                                     </td>
@@ -2918,7 +2918,7 @@ function everydaymoney_form_callback() {
                             if ($sendreceipt == 'yes') {
                                 $decoded = json_decode($payment_array->metadata);
                                 $fullname = $decoded[1]->value;
-                                em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+                                em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $verification_body["result"]["referenceKey"], $payment_array->metadata, $transactionRef);
                                 em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
                             }
                         }
@@ -3384,7 +3384,7 @@ function everydaymoney_forms_webhook() {
                             if ($sendreceipt == 'yes') {
                                 $decoded = json_decode($payment_array->metadata);
                                 $fullname = $decoded[1]->value;
-                                em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+                                em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $verification_body["result"]["referenceKey"], $payment_array->metadata, $transactionRef);
                                 em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
                             }
                         }
