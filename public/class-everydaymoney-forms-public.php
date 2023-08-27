@@ -3203,7 +3203,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                               <div class="notice">A finance charge of 1.5% will be made on unpaid balances after 30 days.</div>
                            </div> -->
                         </main>
-                        <footer>Invoice was created on <?php echo get_site_url(); ?> and is valid without the signature and seal.</footer>
+                        <footer>Invoice was created on <?php echo get_site_url(); ?> and is valid</footer>
                      </div>
                      <div></div>
                   </div>
