@@ -828,11 +828,9 @@ function em_application_tech_send_invoice($currency, $amount, $name, $email, $co
                                                         <table class="primary_btn" align="center" border="0" cellspacing="0" cellpadding="0" style="border-spacing:0;mso-table-lspace:0;mso-table-rspace:0;clear:both;margin:0 auto">
                                                             <tbody>
                                                                 <tr>
-                                                                    <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;margin-top:16px;margin-bottom:24px"><small class="text-muted" style="font-size:86%;font-weight:normal;color:#b3b3b5">Use this link below to try again, if you encountered <br />any issue while trying to make the payment.</small><br>
-                                                                    </p>
                                                                     <td class="font_default" style="padding:12px 24px;font-family:Helvetica,Arial,sans-serif;font-size:16px;mso-line-height-rule:exactly;text-align:center;vertical-align:middle;-webkit-border-radius:4px;border-radius:4px;background-color:#666">
-                                                                        <a href="<?php echo get_site_url() . '/everydaymoneyinvoice/?code=' . $code; ?>" style="display:block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#fff;font-weight:bold;text-align:center">
-                                                                            <span style="text-decoration:none;color:#fff;text-align:center;display:block">Try Again</span>
+                                                                        <a href="<?php echo get_permalink(strip_tags($_POST["emf-id"], "")) . '&transactionRef=' . $code; ?>" style="display:block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#fff;font-weight:bold;text-align:center">
+                                                                            <span style="text-decoration:none;color:#fff;text-align:center;display:block">View Invoice</span>
                                                                         </a>
                                                                     </td>
                                                                 </tr>
@@ -1015,6 +1013,13 @@ function em_application_tech_send_receipt($id, $currency, $amount, $name, $email
                                                                 } ?>
                                                             Transaction code: <strong> <?php echo $code; ?></strong><br>
                                                         </p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="font_default" style="padding:12px 24px;font-family:Helvetica,Arial,sans-serif;font-size:16px;mso-line-height-rule:exactly;text-align:center;vertical-align:middle;-webkit-border-radius:4px;border-radius:4px;background-color:#666">
+                                                        <a href="<?php echo get_permalink(strip_tags($id, "")) . '&transactionRef=' . $code; ?>" style="display:block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#fff;font-weight:bold;text-align:center">
+                                                            <span style="text-decoration:none;color:#fff;text-align:center;display:block">View Receipt</span>
+                                                        </a>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -2769,13 +2774,14 @@ function em_application_tech_submit_action()
         // $insert['ourRef'] = $code;
         // $insert['plan'] = $exist[0]->plan;
         $wpdb->update($table, array('ourRef' => $code), array('id' => $exist[0]->id));
+        em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $body["result"]["transactionRef"]);
     } else {
         $wpdb->insert(
             $table,
             $insert
         );
         if("yes" == get_post_meta($insert['post_id'],'_sendinvoice',true)){
-        em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $code);
+        em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $body["result"]["transactionRef"]);
          }
     }
     //-------------------------------------------------------------------------------------------
