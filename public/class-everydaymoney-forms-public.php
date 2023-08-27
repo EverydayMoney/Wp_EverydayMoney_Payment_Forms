@@ -2810,7 +2810,6 @@ function everydaymoney_form_callback() {
     $message = null;
     $result = null;
     $data = null;
-
     if (isset($_GET["transactionRef"])) {
         $transactionRef = $_GET["transactionRef"];
         $mode = esc_attr(get_option('emMode', 'test'));
@@ -2843,23 +2842,82 @@ function everydaymoney_form_callback() {
 
                 if (!empty($record)) {
                     $payment_array = $record[0];
-                    if ($payment_array->paid == 1) {
+                    if($payment_array->paid == 1){
                         $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
                         $message = $thankyou;
                         $result = "success";
-                    } else {
-                        // Handle other cases if needed
-                        // ...
+                    }else{
+                        // $amount = get_post_meta($payment_array->post_id, '_amount', true);
+                        // $recur = get_post_meta($payment_array->post_id, '_recur', true);
+                        // $currency = get_post_meta($payment_array->post_id, '_currency', true);
+                        // $txncharge = get_post_meta($payment_array->post_id, '_txncharge', true);
+                        // $redirect = get_post_meta($payment_array->post_id, '_redirect', true);
+                        // $minimum = get_post_meta($payment_array->post_id, '_minimum', true);
+                        $usevariableamount = get_post_meta($payment_array->post_id, '_usevariableamount', true);
+                        // $variableamount = get_post_meta($payment_array->post_id, '_variableamount', true);
+                        $usequantity = get_post_meta($payment_array->post_id, '_usequantity', true);
+                        if ($usequantity == "yes") {
+                            $quantity = $_POST["quantity"];
+                            $sold = get_post_meta($payment_array->post_id, '_sold', true);
+                            $sold = empty($sold) ? 0 : (int)$sold;
+                            $sold += $quantity;
+                            update_post_meta($payment_array->post_id, '_sold', $sold);
+                        }
 
-                        // For example, if it's a failure:
-                        // $message = "Payment failed.";
-                        // $result = "failure";
+                        $amount_paid = $verification_body["result"]["amount"] / 100;
+                        $settledAmount = $verification_body["result"]["settledAmount"] / 100;
+                        $paid_at = $verification_body["result"]["paidAt"];
+                        $recur = null; // You should define $recur somewhere
+                        $amount = $payment_array->amount; // You should define $amount somewhere
+                        // $usevariableamount = 1; // You should define $usevariableamount somewhere
+
+                        if ($recur == 'optional' || $recur == 'plan') {
+                            $wpdb->update($table, array('paid' => 1, 'amount' => $amount_paid, 'paid_at' => $paid_at), array('settledAmount' => $settledAmount));
+                            $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
+                            $message = $thankyou;
+                            $result = "success";
+                        } else {
+                            if ($amount == 0 || $usevariableamount == 1) {
+                                $wpdb->update($table, array('paid' => 1, 'amount' => $amount_paid, 'paid_at' => $paid_at, 'settledAmount' => $settledAmount), array('id' => $payment_array->id));
+                                $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
+                                $message = $thankyou;
+                                $result = "success";
+                            } else {
+                                $usequantity = get_post_meta($payment_array->post_id, '_usequantity', true);
+
+                                if ($usequantity == 'no') {
+                                    $oamount = (int)str_replace(' ', '', $amount);
+                                } else {
+                                    $quantity = $_POST["quantity"];
+                                    $unitamount = (int)str_replace(' ', '', get_post_meta($payment_array->post_id, '_amount', true));
+                                    $oamount = $quantity * $unitamount;
+                                }
+
+                                if ($oamount != $amount_paid) {
+                                    $message = "Invalid amount Paid. Amount required is " . 'NGN' . "<b>" . number_format($oamount) . "</b>";
+                                    $result = "failed";
+                                } else {
+                                    $wpdb->update($table, array('paid' => 1, 'paid_at' => $paid_at, 'settledAmount' => $settledAmount), array('id' => $payment_array->id));
+                                    $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
+                                    $message = $thankyou;
+                                    $result = "success";
+                                }
+                            }
+                        }
+                        if($result == "success"){
+                            $sendreceipt = get_post_meta($payment_array->post_id, '_sendreceipt', true);
+                            if ($sendreceipt == 'yes') {
+                                $decoded = json_decode($payment_array->metadata);
+                                $fullname = $decoded[1]->value;
+                                // em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+                                // em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+                            }
+                        }
                     }
                 }
             }
         }
     }
-
     // Render HTML based on $result === "success" or "failure"
     if ($result === "success") {
         // Render success HTML
