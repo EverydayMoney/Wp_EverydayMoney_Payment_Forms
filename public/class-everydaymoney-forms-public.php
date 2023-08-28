@@ -2948,7 +2948,9 @@ function everydaymoney_form_callback() {
 }
 
 function getInvoiceReceipt($verification_body, $payment_array){  
-    $currency = get_post_meta($payment_array->post_id, '_currency', true);  
+    $currency = get_post_meta($payment_array->post_id, '_currency', true);
+    $localTimeZone = new DateTimeZone('Africa/Lagos');
+    $receiptDate = new DateTime($verification_body['result']['paidAt']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -3139,9 +3141,8 @@ function getInvoiceReceipt($verification_body, $payment_array){
                         <header>
                            <div class="row">
                               <div class="col">
-                                 <a href="javascript:;">
-                                 <img src="assets/images/logo-icon.png" width="80" alt>
-                                 </a>
+                                 <!-- <img src="assets/images/logo-icon.png" width="80" alt> -->
+                                
                               </div>
                               <div class="col company-details">
                                  <h2 class="name">
@@ -3160,7 +3161,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                               <div class="col invoice-details">
                                  <h1 class="invoice-id">RECEIPT</h1>
                                  <div>Invoice No: <?php echo $payment_array->ourRef; ?></div>
-                                 <div class="date">Date: <?php echo $verification_body['result']['paidAt']; ?></div>
+                                 <div class="date">Date: <?php echo $receiptDate->format('Y-m-d H:i:s');; ?></div>
                               </div>
                            </div>
                            <table>
@@ -3182,7 +3183,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                                             echo '<tr>';
                                             echo '<td class="no">' . $increment++ . '</td>';
                                             echo '<td class="text-left"><h3>' . ($nvalue->variable_name == 'emf-currency' ? 'Currency' : $nvalue->display_name ). '</h3></td>';
-                                            echo '<td class="total">' . $nvalue->value .'</td>';
+                                            echo '<td class="unit">' . $nvalue->value .'</td>';
                                             echo '</tr>';
                                         }
                                     }
@@ -3199,10 +3200,16 @@ function getInvoiceReceipt($verification_body, $payment_array){
                                  </tr>
                               </tfoot>
                            </table>
-                           <!-- <div class="notices">
-                              <div>NOTICE:</div>
-                              <div class="notice">A finance charge of 1.5% will be made on unpaid balances after 30 days.</div>
-                           </div> -->
+                           <div class="notices">
+                              <div>VERIFICATION:</div>
+                              <div class="notice">Scan the code to verify the authenticity of this document</div>
+                              <?php
+                                if (function_exists('gd_info')) {
+                                    include_once __DIR__ . '/qr-code/qr-generator.php';
+                                    // GD library is installed, you can proceed with your QR code generation code here
+                                }
+                                ?>
+                           </div>
                         </main>
                         <footer>Invoice was created on <?php echo get_site_url(); ?> #<?php echo $payment_array->transactionRef; ?></footer>
                      </div>
