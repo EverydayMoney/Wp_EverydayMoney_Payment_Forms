@@ -3145,20 +3145,21 @@ function getInvoiceReceipt($verification_body, $payment_array){
                               </div>
                               <div class="col company-details">
                                  <h2 class="name">
-                                 <?php echo $payment_array->email; ?>
+                                 <?php echo get_option('blogname'); ?>
                                  </h2>
-                                 <div><?php echo $payment_array->ourRef; ?></div>
-                                 <div><?php echo $payment_array->transactionRef; ?></div>
                               </div>
                            </div>
                         </header>
                         <main>
                            <div class="row contacts">
                               <div class="col invoice-to">
-                                 <!-- <div class="text-gray-light">In Respect Of:</div> -->
+                              <div class="text-gray-light">TO:</div>
+                                <h2 class="to"><?php echo $payment_array->email; ?></h2>
+                                 <div></div>
                               </div>
                               <div class="col invoice-details">
                                  <h1 class="invoice-id">RECEIPT</h1>
+                                 <div>Invoice No: <?php echo $payment_array->ourRef; ?></div>
                                  <div class="date">Date: <?php echo $verification_body['result']['paidAt']; ?></div>
                               </div>
                            </div>
@@ -3180,7 +3181,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                                         foreach ($nmeta as $nkey => $nvalue) {
                                             echo '<tr>';
                                             echo '<td class="no">' . $increment++ . '</td>';
-                                            echo '<td class="text-left"><h3>' . $nvalue->display_name . '</h3></td>';
+                                            echo '<td class="text-left"><h3>' . ($nvalue->variable_name == 'emf-currency' ? 'Currency' : $nvalue->display_name ). '</h3></td>';
                                             echo '<td class="total">' . $nvalue->value .'</td>';
                                             echo '</tr>';
                                         }
@@ -3203,7 +3204,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                               <div class="notice">A finance charge of 1.5% will be made on unpaid balances after 30 days.</div>
                            </div> -->
                         </main>
-                        <footer>Invoice was created on <?php echo get_site_url(); ?> and is valid</footer>
+                        <footer>Invoice was created on <?php echo get_site_url(); ?> #<?php echo $payment_array->transactionRef; ?></footer>
                      </div>
                      <div></div>
                   </div>
