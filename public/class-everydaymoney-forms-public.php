@@ -3161,7 +3161,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                               <div class="col invoice-details">
                                  <h1 class="invoice-id">RECEIPT</h1>
                                  <div>Invoice No: <?php echo $payment_array->ourRef; ?></div>
-                                 <div class="date">Date: <?php echo $receiptDate->format('Y-m-d H:i:s');; ?></div>
+                                 <div class="date">Date: <?php echo $receiptDate->format('Y-m-d H:i:s'); ?></div>
                               </div>
                            </div>
                            <table>
@@ -3180,6 +3180,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                                         $nmeta = json_decode($fixedmetadata);
                                         $increment = 1;
                                         foreach ($nmeta as $nkey => $nvalue) {
+                                            if($nvalue->variable_name == 'Plan') continue;
                                             echo '<tr>';
                                             echo '<td class="no">' . $increment++ . '</td>';
                                             echo '<td class="text-left"><h3>' . ($nvalue->variable_name == 'emf-currency' ? 'Currency' : $nvalue->display_name ). '</h3></td>';
