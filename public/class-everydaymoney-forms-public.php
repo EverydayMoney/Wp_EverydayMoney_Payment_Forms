@@ -2925,6 +2925,15 @@ function everydaymoney_form_callback() {
                     } else {
                         $message = "Payment is still pending";
                         $result = "failure";
+                        if(isset($_GET['cancel'])){
+                            return wp_redirect('/');
+                        }
+                        if ($mode == 'test') {
+                            return wp_redirect("https://dtu039g57sbfd.cloudfront.net/?transactionRef=" . $transactionRef);
+                        }else{
+                            return wp_redirect("https://d1cwe56lizu154.cloudfront.net?transactionRef=" . $transactionRef);
+                        }
+                        
                     }
                 }
             }
