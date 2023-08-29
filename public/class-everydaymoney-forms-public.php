@@ -2774,7 +2774,7 @@ function em_application_tech_submit_action()
         // $insert['ourRef'] = $code;
         // $insert['plan'] = $exist[0]->plan;
         $wpdb->update($table, array('ourRef' => $code), array('id' => $exist[0]->id));
-        em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $body["result"]["transactionRef"]);
+        // em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $body["result"]["transactionRef"]);
     } else {
         $wpdb->insert(
             $table,
@@ -2789,8 +2789,8 @@ function em_application_tech_submit_action()
     // $pstk_logger = new paystack_plugin_tracker('everydaymoney-form', EM_T_EverydayMoney_Public::fetchPublicKey());
     // $pstk_logger->log_transaction_attempt($code);
 
-    echo json_encode($body);
-    die();
+    // echo json_encode($body);
+    wp_send_json($body);
 }
 
 function everydaymoney_form_confirm() {
