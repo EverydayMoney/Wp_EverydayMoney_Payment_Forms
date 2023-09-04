@@ -381,9 +381,9 @@ function EverydayMoneyConfig() {
                   // var obj = new EverydayMoneyConfig();
                   // console.log({obj});
                   if(window.EVERYDAYMONEY_SETTINGS.liveMode){
-                    window.location.href = `https://d1cwe56lizu154.cloudfront.net?transactionRef=${data.result.transactionRef}`;
+                    window.location.href = `https://d1cwe56lizu154.cloudfront.net?methods=bank_transfer,card&transactionRef=${data.result.transactionRef}`;
                   }else{
-                    window.location.href = `https://dtu039g57sbfd.cloudfront.net/?transactionRef=${data.result.transactionRef}`;
+                    window.location.href = `https://dtu039g57sbfd.cloudfront.net/?methods=bank_transfer,card&transactionRef=${data.result.transactionRef}`;
                   }
               } else {
                 alert(data.result);
