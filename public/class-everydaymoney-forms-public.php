@@ -2693,7 +2693,7 @@ function em_application_tech_submit_action()
     $fixedmetadata = json_decode(json_encode($fixedmetadata, JSON_NUMERIC_CHECK), true);
     $fixedmetadata = array_merge($untouchedmetadata, $fixedmetadata);
 
-    $settlementWalletId = get_post_meta(($_POST["emf-id"], '_settlementWalletId', true);
+    $settlementWalletId = get_post_meta($_POST["emf-id"], '_settlementWalletId', true);
     if ($settlementWalletId == "") {
         $settlementWalletId = 'default';
     }
