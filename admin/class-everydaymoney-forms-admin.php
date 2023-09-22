@@ -734,6 +734,9 @@ class EverydayMoney_Admin
             $form_meta['_subaccount'] = $_POST['_subaccount'];
             $form_meta['_txnbearer'] = $_POST['_txnbearer'];
             $form_meta['_merchantamount'] = $_POST['_merchantamount'];
+
+            $form_meta['_settlementWalletId'] = $_POST['_settlementWalletId'];
+            $form_meta['_receiptWaterMarkImageUrl'] = $_POST['_receiptWaterMarkImageUrl'];
             // Add values of $form_meta as custom fields
 
             //Custom Plan with Start Date
