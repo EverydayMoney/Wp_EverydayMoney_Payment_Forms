@@ -22,7 +22,7 @@ class EverydayMoney_Admin
             register_setting('em-t-everydaymoney-settings-group', 'emSecretKeyKey');
             register_setting('em-t-everydaymoney-settings-group', 'emPublicKey');
             register_setting('em-t-everydaymoney-settings-group', 'emChargeInclusive');
-            register_setting('em-t-everydaymoney-settings-group', 'emWallet');
+            // register_setting('em-t-everydaymoney-settings-group', 'emWallet');
         }
         function em_application_tech_txncheck($name, $txncharge)
         {
@@ -88,10 +88,10 @@ class EverydayMoney_Admin
                             <td><input type="text" name="emWebhookUrl" value="<?php echo esc_attr(get_option('emWebhookUrl', get_site_url() . "/index.php?everydaymoney_form_webhook=1")); ?>" /></td>
                         </tr>
 
-                        <tr valign="top">
+                        <!-- <tr valign="top">
                             <th scope="row">Wallet <br> <small>(Settlement will occur on this wallet)</small></th>
                             <td><input type="text" name="emWallet" value="<?php echo esc_attr(get_option('emWallet', "default")); ?>" /></td>
-                        </tr>
+                        </tr> -->
                        
                     </table>
 
@@ -299,6 +299,7 @@ class EverydayMoney_Admin
             // add_meta_box('em_application_tech_editor_add_agreement_data', 'Agreement checkbox', 'em_application_tech_editor_add_agreement_data', 'everydaymoney_form', 'side', 'default');
             // add_meta_box('em_application_tech_editor_add_subaccount_data', 'Sub Account', 'em_application_tech_editor_add_subaccount_data', 'everydaymoney_form', 'side', 'default');
             // add_meta_box('em_application_tech_editor_add_startdateplan_data', '*Special: Subscribe to plan after time', 'em_application_tech_editor_add_startdateplan_data', 'everydaymoney_form', 'side', 'default');
+            add_meta_box('em_application_tech_editor_add_everydaymoney_data', 'Settlement Wallet', 'em_application_tech_editor_add_everydaymoney_data', 'everydaymoney_form', 'normal', 'default');
         }
 
 
@@ -408,6 +409,25 @@ class EverydayMoney_Admin
             echo '<p>Redirect to page link after payment(keep blank to use normal success message):</p>';
             echo '<input ttype="text" name="_redirect" value="' . $redirect  . '" class="widefat" />';
         }
+        function em_application_tech_editor_add_everydaymoney_data()
+        {
+            global $post;
+
+            // Noncename needed to verify where the data originated
+            echo '<input type="hidden" name="eventmeta_noncename" id="eventmeta_noncename" value="' .
+                wp_create_nonce(plugin_basename(__FILE__)) . '" />';
+
+            // Get the location data if its already been entered
+            $settlementWaleltId = get_post_meta($post->ID, '_settlementWalletId', true);
+
+            if ($settlementWaleltId == "") {
+                $settlementWaleltId = 'default';
+            }
+
+            // Echo out the field
+            echo '<p>Settlement Wallet (Settlement will occur on this wallet):</p>';
+            echo '<input type="text" name="_settlementWalletId" value="' . $settlementWaleltId  . '" class="widefat" />';
+        }
         function em_application_tech_editor_add_email_data()
         {
             global $post;
@@ -423,6 +443,7 @@ class EverydayMoney_Admin
             $message = get_post_meta($post->ID, '_message', true);
             $sendreceipt = get_post_meta($post->ID, '_sendreceipt', true);
             $sendinvoice = get_post_meta($post->ID, '_sendinvoice', true);
+            $receiptWaterMarkImageUrl = get_post_meta($post->ID, '_receiptWaterMarkImageUrl', true);
 
             if ($subject == "") {
                 $subject = 'Thank you for your payment';
@@ -458,6 +479,8 @@ class EverydayMoney_Admin
             echo '<input type="text" name="_heading" value="' . $heading  . '" class="widefat" />';
             echo '<p>Email Body/Message:</p>';
             echo '<textarea rows="6"  name="_message"  class="widefat" >' . $message . '</textarea>';
+            echo '<p>Receipt Watermark Image Url (Optional):</p>';
+            echo '<input type="text" name="_receiptWaterMarkImageUrl" value="' . $receiptWaterMarkImageUrl  . '" class="widefat" />';
         }
         function em_application_tech_editor_add_recur_data()
         {

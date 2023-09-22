@@ -2692,6 +2692,11 @@ function em_application_tech_submit_action()
 
     $fixedmetadata = json_decode(json_encode($fixedmetadata, JSON_NUMERIC_CHECK), true);
     $fixedmetadata = array_merge($untouchedmetadata, $fixedmetadata);
+
+    $settlementWalletId = get_post_meta(($_POST["emf-id"], '_settlementWalletId', true);
+    if ($settlementWalletId == "") {
+        $settlementWalletId = 'default';
+    }
     /*
         * Array with parameters for API interaction
         */
@@ -2702,7 +2707,7 @@ function em_application_tech_submit_action()
         "referenceKey" => $code,
         "amount" => $originalamount,
         "currency" => "NGN",
-        "wallet" => esc_attr(get_option('emWallet', 'default')),
+        "wallet" => $settlementWalletId,
         "inclusive" => esc_attr(get_option('emChargeInclusive')) == "yes" ? true : false,
         "email" => strip_tags($_POST["emf-pemail"], ""),
     ];
@@ -2971,6 +2976,15 @@ function getInvoiceReceipt($verification_body, $payment_array){
       <style type="text/css">
          body{margin-top:20px;
          background-color: #f7f7ff;
+         <?php
+         $backgroundImageUrl = get_post_meta($payment_array->post_id, '_receiptWaterMarkImageUrl', true);
+         if($backgroundImageUrl != ""){
+         ?>
+         background-image: url('<?php echo $backgroundImageUrl ?>');
+         <?php
+         }
+         ?>
+        background-color: #f7f7ff;
          }
          #invoice {
          padding: 0px;
