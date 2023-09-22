@@ -3174,7 +3174,14 @@ function getInvoiceReceipt($verification_body, $payment_array){
                               </div>
                               <div class="col company-details">
                                  <h2 class="name">
-                                 <?php echo get_option('blogname'); ?>
+                                 <?php 
+                                 $merchant = get_post_meta($payment_array->post_id, '_merchant', true);
+                                 if($merchant == ""){
+                                 echo get_option('blogname'); 
+                                 } else {
+                                    echo $merchant;
+                                 }
+                                 ?>
                                  </h2>
                               </div>
                            </div>
