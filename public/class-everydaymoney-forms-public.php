@@ -2981,6 +2981,11 @@ function getInvoiceReceipt($verification_body, $payment_array){
          if($backgroundImageUrl != ""){
          ?>
          background-image: url('<?php echo $backgroundImageUrl ?>');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed; /* This keeps the background fixed while scrolling */
+        background-color: rgba(247, 247, 255, 0.8); /* Adjust the color and opacity here */
          <?php
          }
          ?>
