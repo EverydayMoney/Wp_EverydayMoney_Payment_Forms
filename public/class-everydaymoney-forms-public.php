@@ -2976,20 +2976,6 @@ function getInvoiceReceipt($verification_body, $payment_array){
       <style type="text/css">
          body{margin-top:20px;
          background-color: #f7f7ff;
-         <?php
-         $backgroundImageUrl = get_post_meta($payment_array->post_id, '_receiptWaterMarkImageUrl', true);
-         if($backgroundImageUrl != ""){
-         ?>
-         background-image: url('<?php echo $backgroundImageUrl ?>');
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center center;
-        background-attachment: fixed; /* This keeps the background fixed while scrolling */
-        background-color: rgba(247, 247, 255, 0.8); /* Adjust the color and opacity here */
-         <?php
-         }
-         ?>
-        background-color: #f7f7ff;
          }
          #invoice {
          padding: 0px;
@@ -3154,6 +3140,14 @@ function getInvoiceReceipt($verification_body, $payment_array){
    </head>
    <body>
       <div class="container">
+      <?php
+         $backgroundImageUrl = get_post_meta($payment_array->post_id, '_receiptWaterMarkImageUrl', true);
+         if($backgroundImageUrl != ""){
+         ?>
+         <img src="<?php echo $backgroundImageUrl ?>" style="position: fixed;z-index: 5000;opacity: 0.2;display: block;margin: 0 auto;">
+         <?php
+         }
+         ?>
          <div class="card">
             <div class="card-body">
                <div id="invoice">
