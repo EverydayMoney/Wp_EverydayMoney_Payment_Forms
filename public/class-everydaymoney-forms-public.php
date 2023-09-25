@@ -2740,6 +2740,8 @@ function em_application_tech_submit_action()
         "body" => json_encode($args),
     ]);
 
+    die(json_decode($response["body"], true));
+
     $body = null;
 
     if (!is_wp_error($response)) {
