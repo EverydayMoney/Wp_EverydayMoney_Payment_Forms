@@ -2699,7 +2699,7 @@ function em_application_tech_submit_action()
     }
     $emPublicKey = get_post_meta($_POST["emf-id"], '_emPublicKey', true);
     if ($emPublicKey == "") {
-        $emPublicKey = EM_T_EverydayMoney_Public::fetchPublicKey()
+        $emPublicKey = EM_T_EverydayMoney_Public::fetchPublicKey();
     }
     /*
         * Array with parameters for API interaction
