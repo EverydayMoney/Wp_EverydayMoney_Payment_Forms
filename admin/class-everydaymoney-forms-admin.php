@@ -424,9 +424,16 @@ class EverydayMoney_Admin
                 $settlementWaleltId = 'default';
             }
 
+            $publicKey = get_post_meta($post->ID, '_emPublicKey', true);
+            $secretKey = get_post_meta($post->ID, '_emSecretKey', true);
+
             // Echo out the field
             echo '<p>Settlement Wallet (Settlement will occur on this wallet):</p>';
             echo '<input type="text" name="_settlementWalletId" value="' . $settlementWaleltId  . '" class="widefat" />';
+            echo '<p>Public Key (The global public key will be used if empty):</p>';
+            echo '<input type="text" name="_emPublicKey" value="' . $publicKey  . '" class="widefat" />';
+            echo '<p>Secret Key (The global secret key will be used if empty):</p>';
+            echo '<input type="text" name="_emSecretKey" value="' . $secretKey  . '" class="widefat" />';
         }
         function em_application_tech_editor_add_email_data()
         {
@@ -737,6 +744,8 @@ class EverydayMoney_Admin
 
             $form_meta['_settlementWalletId'] = $_POST['_settlementWalletId'];
             $form_meta['_receiptWaterMarkImageUrl'] = $_POST['_receiptWaterMarkImageUrl'];
+            $form_meta['_emPublicKey'] = $_POST['_emPublicKey'];
+            $form_meta['_emSecretKey'] = $_POST['_emSecretKey'];
             // Add values of $form_meta as custom fields
 
             //Custom Plan with Start Date

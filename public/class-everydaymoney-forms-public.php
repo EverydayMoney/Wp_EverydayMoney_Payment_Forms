@@ -2697,11 +2697,15 @@ function em_application_tech_submit_action()
     if ($settlementWalletId == "") {
         $settlementWalletId = 'default';
     }
+    $emPublicKey = get_post_meta($_POST["emf-id"], '_emPublicKey', true);
+    if ($emPublicKey == "") {
+        $emPublicKey = EM_T_EverydayMoney_Public::fetchPublicKey()
+    }
     /*
         * Array with parameters for API interaction
         */
     $args = [
-        "publicKey" => EM_T_EverydayMoney_Public::fetchPublicKey(),
+        "publicKey" => $emPublicKey,
         "customerName" => $fullname,
         "customerKey" => strip_tags($_POST["emf-pemail"], ""),
         "referenceKey" => $code,
