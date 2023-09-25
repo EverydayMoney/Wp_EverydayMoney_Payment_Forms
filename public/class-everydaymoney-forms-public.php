@@ -139,7 +139,7 @@ function em_application_tech_mail_from_name()
 }
 
 
-function em_application_tech_send_invoice($currency, $amount, $name, $email, $code)
+function em_application_tech_send_invoice($currency, $amount, $name, $email, $code, $mechantName = "")
 {
     //  echo date('F j,Y');
     $user_email = stripslashes($email);
@@ -824,7 +824,7 @@ function em_application_tech_send_invoice($currency, $amount, $name, $email, $co
                                             <tbody>
                                                 <tr>
                                                     <td class="column_cell font_default" align="center" valign="top" style="padding:16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;text-align:center;vertical-align:top;color:#888">
-                                                        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;margin-top:16px;margin-bottom:24px">You're getting this email because <br />you tried making a payment to <?php echo get_option('blogname'); ?>.</p>
+                                                        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;margin-top:16px;margin-bottom:24px">You're getting this email because <br />you tried making a payment to <?php echo ($mechantName == "" ? get_option('blogname') : $mechantName ); ?>.</p>
                                                         <table class="primary_btn" align="center" border="0" cellspacing="0" cellpadding="0" style="border-spacing:0;mso-table-lspace:0;mso-table-rspace:0;clear:both;margin:0 auto">
                                                             <tbody>
                                                                 <tr>
@@ -2792,7 +2792,8 @@ function em_application_tech_submit_action()
             $insert
         );
         if("yes" == get_post_meta($insert['post_id'],'_sendinvoice',true)){
-        em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $body["result"]["transactionRef"]);
+        $mechantName = get_post_meta($_POST["emf-id"], '_merchant', true);
+        em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $body["result"]["transactionRef"], $mechantName);
          }
     }
     //-------------------------------------------------------------------------------------------
