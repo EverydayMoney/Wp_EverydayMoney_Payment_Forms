@@ -2698,6 +2698,7 @@ function em_application_tech_submit_action()
         $settlementWalletId = 'default';
     }
     $emPublicKey = get_post_meta($_POST["emf-id"], '_emPublicKey', true);
+    die($emPublicKey);
     if ($emPublicKey == "") {
         $emPublicKey = EM_T_EverydayMoney_Public::fetchPublicKey();
     }
