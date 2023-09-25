@@ -3146,14 +3146,6 @@ function getInvoiceReceipt($verification_body, $payment_array){
    </head>
    <body>
       <div class="container">
-      <?php
-         $backgroundImageUrl = get_post_meta($payment_array->post_id, '_receiptWaterMarkImageUrl', true);
-         if($backgroundImageUrl != ""){
-         ?>
-         <img src="<?php echo $backgroundImageUrl ?>" style="position: fixed;z-index: 5000;opacity: 0.2;display: block;margin: 0 auto;">
-         <?php
-         }
-         ?>
          <div class="card">
             <div class="card-body">
                <div id="invoice">
@@ -3165,6 +3157,14 @@ function getInvoiceReceipt($verification_body, $payment_array){
                      <hr>
                   </div>
                   <div class="invoice overflow-auto">
+                  <?php
+                    $backgroundImageUrl = get_post_meta($payment_array->post_id, '_receiptWaterMarkImageUrl', true);
+                    if($backgroundImageUrl != ""){
+                    ?>
+                    <img src="<?php echo $backgroundImageUrl ?>" style="position: fixed;z-index: 5000;opacity: 0.2;display: block;margin: 0 auto;">
+                    <?php
+                    }
+                    ?>
                      <div style="min-width: 600px">
                         <header>
                            <div class="row">
