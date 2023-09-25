@@ -2740,7 +2740,7 @@ function em_application_tech_submit_action()
         "body" => json_encode($args),
     ]);
 
-    die(json_decode($response["body"], true));
+    print_r(json_decode($response["body"], true));
 
     $body = null;
 
