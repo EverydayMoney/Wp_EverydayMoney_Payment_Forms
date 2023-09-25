@@ -69,7 +69,7 @@ function em_application_tech_mail_from_name()
 }
 
 
-function em_application_tech_send_invoice($currency, $amount, $name, $email, $code)
+function em_application_tech_send_invoice($currency, $amount, $name, $email, $code, $mechantName = "")
 {
     //  echo date('F j,Y');
     $user_email = stripslashes($email);
@@ -179,7 +179,7 @@ function em_application_tech_send_invoice($currency, $amount, $name, $email, $co
     <tbody>
     <tr>
     <td class="column_cell font_default" align="center" valign="top" style="padding:16px;font-family:Helvetica,Arial,sans-serif;font-size:15px;text-align:center;vertical-align:top;color:#888">
-    <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;margin-top:16px;margin-bottom:24px">You're getting this email because <br />you tried making a payment to <?php echo get_option('blogname'); ?>.</p>
+    <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;margin-top:16px;margin-bottom:24px">You're getting this email because <br />you tried making a payment to <?php echo ($mechantName == "" ? get_option('blogname') :  $mechantName); ?>.</p>
     <table class="primary_btn" align="center" border="0" cellspacing="0" cellpadding="0" style="border-spacing:0;mso-table-lspace:0;mso-table-rspace:0;clear:both;margin:0 auto">
     <tbody>
     <tr>
@@ -391,7 +391,7 @@ function em_application_tech_send_receipt($id, $currency, $amount, $name, $email
     <tr>
     <td class="column_cell font_default" align="center" valign="top" style="padding:16px 16px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;text-align:center;vertical-align:top;color:#888">
     <small style="font-size:86%;font-weight:normal"><strong>Notice</strong><br>
-    You're getting this email because you've made a payment of <?php $currency.' '.number_format($amount); ?> to <a href="<?php echo get_bloginfo('url') ?>" style="display:inline-block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#2f68b4"><?php echo get_option('blogname'); ?></a>.</small>
+    You're getting this email because you've made a payment of <?php $currency.' '.number_format($amount); ?> on <a href="<?php echo get_bloginfo('url') ?>" style="display:inline-block;text-decoration:none;font-family:Helvetica,Arial,sans-serif;color:#2f68b4"><?php echo get_option('blogname'); ?></a>.</small>
     </td>
     </tr>
     </tbody>
@@ -1272,6 +1272,7 @@ function em_application_tech_submit_action()
     $originalamount = $amount;
     $quantity = 1;
     $usequantity = get_post_meta($_POST["emf-id"], '_usequantity', true);
+    $mechantName = get_post_meta($_POST["emf-id"], '_merchant', true);
 
     if (($recur == 'no') && ($formamount != 0)) {
         $amount = (int)str_replace(' ', '', $formamount);
@@ -1365,7 +1366,7 @@ function em_application_tech_submit_action()
             $insert
         );
         // if("yes" == get_post_meta($insert['post_id'],'_sendinvoice',true)){
-        em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $code);
+        em_application_tech_send_invoice($currency, $insert['amount'], $fullname, $insert['email'], $code, $mechantName);
         // }
     }
     if ($subaccount == "" || !isset($subaccount)) {
