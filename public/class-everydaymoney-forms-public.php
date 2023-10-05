@@ -2962,7 +2962,13 @@ function everydaymoney_form_callback() {
             echo '<div class="failure-message">' . $message . '</div>';
         } else {
             echo '<div class="failure-message">Something went wrong, please try again later</div>';
-            var_dump($verification_response);
+            try{
+                $pluginlog = plugin_dir_path(__FILE__).'debug.log';
+                $message = json_encode($verification_response).PHP_EOL;
+                error_log($message, 3, $pluginlog);
+            }catch(Exception $e){
+                // Nothing
+            }
         }
     }else{
         // TODO: Render: Payment Cancelled
