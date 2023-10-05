@@ -2961,7 +2961,7 @@ function everydaymoney_form_callback() {
             // Render failure HTML
             echo '<div class="failure-message">' . $message . '</div>';
         } else {
-            echo '<div class="failure-message">Something went wrong, please try again later</div>';
+            echo '<div class="failure-message">Something went wrong, please contact support or try again later</div>';
             try{
                 $pluginlog = plugin_dir_path(__FILE__).'debug.log';
                 $message = json_encode($verification_response).PHP_EOL;
