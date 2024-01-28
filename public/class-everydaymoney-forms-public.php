@@ -2730,10 +2730,10 @@ function em_application_tech_submit_action()
     $mode =  esc_attr(get_option('emMode', 'test'));
     if ($mode == 'test') {
         $chargeUrl =
-            "https://em-api-staging.everydaymoney.app/payment/business/charge";
+            "https://em-api-staging.logicaladdress.com/payment/business/charge";
     } else {
         $chargeUrl =
-        "https://em-api-prod.everydaymoney.app/payment/business/charge";
+        "https://em-api-prod.logicaladdress.com/payment/business/charge";
     }
     $response = wp_remote_post($chargeUrl, [
         "headers" => ["Content-type" => "application/json"],
@@ -2837,9 +2837,9 @@ function everydaymoney_form_callback() {
         $table = $wpdb->prefix . EM_APPLICATION_TECH_TABLE;
 
         if ($mode == 'test') {
-            $chargeUrl = "https://em-api-staging.everydaymoney.app/payment/business/charge";
+            $chargeUrl = "https://em-api-staging.logicaladdress.com/payment/business/charge";
         } else {
-            $chargeUrl = "https://em-api-prod.everydaymoney.app/payment/business/charge";
+            $chargeUrl = "https://em-api-prod.logicaladdress.com/payment/business/charge";
         }
 
         // TODO: Set PublicKey in Header
@@ -3342,9 +3342,9 @@ function everydaymoney_forms_webhook() {
         $table = $wpdb->prefix . EM_APPLICATION_TECH_TABLE;
 
         if ($mode == 'test') {
-            $chargeUrl = "https://em-api-staging.everydaymoney.app/payment/business/charge";
+            $chargeUrl = "https://em-api-staging.logicaladdress.com/payment/business/charge";
         } else {
-            $chargeUrl = "https://em-api-prod.everydaymoney.app/payment/business/charge";
+            $chargeUrl = "https://em-api-prod.logicaladdress.com/payment/business/charge";
         }
 
         // TODO: Set PublicKey in Header
