@@ -2941,9 +2941,9 @@ function everydaymoney_form_callback() {
                             return wp_redirect('/');
                         }
                         if ($mode == 'test') {
-                            return wp_redirect("https://d1dgpf0x6r1spi.cloudfront.net/?methods=bank_transfer,card&transactionRef=" . $transactionRef);
+                            return wp_redirect("https://di0yljy1dvrl5.cloudfront.net/?methods=bank_transfer,card&transactionRef=" . $transactionRef);
                         }else{
-                            return wp_redirect("https://ddkb3jswdljoz.cloudfront.net?methods=bank_transfer,card&transactionRef=" . $transactionRef);
+                            return wp_redirect("https://d1rwjlssqg8f65.cloudfront.net?methods=bank_transfer,card&transactionRef=" . $transactionRef);
                         }
                         
                     }
