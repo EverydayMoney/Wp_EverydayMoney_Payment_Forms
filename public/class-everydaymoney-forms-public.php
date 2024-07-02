@@ -2943,7 +2943,7 @@ function everydaymoney_form_callback() {
                         if ($mode == 'test') {
                             return wp_redirect("https://di0yljy1dvrl5.cloudfront.net/?methods=bank_transfer,card&transactionRef=" . $transactionRef);
                         }else{
-                            return wp_redirect("https://d1rwjlssqg8f65.cloudfront.net?methods=bank_transfer,card&transactionRef=" . $transactionRef);
+                            return wp_redirect("https://checkout.everydaymoney.app?methods=bank_transfer,card&transactionRef=" . $transactionRef);
                         }
                         
                     }

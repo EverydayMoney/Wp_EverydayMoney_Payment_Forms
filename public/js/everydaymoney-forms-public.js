@@ -381,7 +381,7 @@ function EverydayMoneyConfig() {
                   // var obj = new EverydayMoneyConfig();
                   // console.log({obj});
                   if(window.EVERYDAYMONEY_SETTINGS.liveMode){
-                    window.location.href = `https://d1rwjlssqg8f65.cloudfront.net?methods=bank_transfer,card&transactionRef=${data.result.transactionRef}`;
+                    window.location.href = `https://checkout.everydaymoney.app?methods=bank_transfer,card&transactionRef=${data.result.transactionRef}`;
                   }else{
                     window.location.href = `https://di0yljy1dvrl5.cloudfront.net/?methods=bank_transfer,card&transactionRef=${data.result.transactionRef}`;
                   }
@@ -425,7 +425,7 @@ function EverydayMoneyConfig() {
               if (!data.isError) {
                 var obj = new EverydayMoneyConfig();
                 if(obj.liveMode){
-                  window.location.href = `https://d1rwjlssqg8f65.cloudfront.net?methods=bank_transfer,card&transactionRef=${data.result.transactionRef}`;
+                  window.location.href = `https://checkout.everydaymoney.app?methods=bank_transfer,card&transactionRef=${data.result.transactionRef}`;
                 }else{
                   window.location.href = `https://di0yljy1dvrl5.cloudfront.net/?methods=bank_transfer,card&transactionRef=${data.result.transactionRef}`;
                 }
