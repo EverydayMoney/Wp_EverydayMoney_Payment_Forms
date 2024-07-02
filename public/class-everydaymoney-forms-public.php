@@ -2837,9 +2837,9 @@ function everydaymoney_form_callback() {
         $table = $wpdb->prefix . EM_APPLICATION_TECH_TABLE;
 
         if ($mode == 'test') {
-            $chargeUrl = "https://em-api-staging.logicaladdress.com/payment/business/charge";
+            $chargeUrl = "https://em-api-staging.everydaymoney.app/payment/business/charge";
         } else {
-            $chargeUrl = "https://em-api-prod.logicaladdress.com/payment/business/charge";
+            $chargeUrl = "https://em-api-prod.everydaymoney.app/payment/business/charge";
         }
 
         // TODO: Set PublicKey in Header
@@ -3342,9 +3342,9 @@ function everydaymoney_forms_webhook() {
         $table = $wpdb->prefix . EM_APPLICATION_TECH_TABLE;
 
         if ($mode == 'test') {
-            $chargeUrl = "https://em-api-staging.logicaladdress.com/payment/business/charge";
+            $chargeUrl = "https://em-api-staging.everydaymoney.app/payment/business/charge";
         } else {
-            $chargeUrl = "https://em-api-prod.logicaladdress.com/payment/business/charge";
+            $chargeUrl = "https://em-api-prod.everydaymoney.app/payment/business/charge";
         }
 
         // TODO: Set PublicKey in Header
