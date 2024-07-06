@@ -997,6 +997,12 @@ function em_application_tech_send_receipt($id, $currency, $amount, $name, $email
                                                                 $new = json_decode($metadata);
                                                                 if (array_key_exists("0", $new)) {
                                                                     foreach ($new as $key => $item) {
+                                                                        // Skip if 'hidden' is in the display_name or if it's related to the plan
+                                                                        if (stripos($item->display_name, 'hidden') !== false || 
+                                                                            stripos($item->display_name, 'plan') !== false) {
+                                                                            continue;
+                                                                        }
+                                                                        
                                                                         if ($item->type == 'text') {
                                                                             echo $item->display_name . "<strong>  :" . $item->value . "</strong><br>";
                                                                         } else {
@@ -1007,10 +1013,17 @@ function em_application_tech_send_receipt($id, $currency, $amount, $name, $email
                                                                     $text = '';
                                                                     if (count($new) > 0) {
                                                                         foreach ($new as $key => $item) {
+                                                                            // Skip if 'hidden' is in the key or if it's related to the plan
+                                                                            if (stripos($key, 'hidden') !== false || 
+                                                                                stripos($key, 'plan') !== false) {
+                                                                                continue;
+                                                                            }
+                                                                            
                                                                             echo $key . "<strong>  :" . $item . "</strong><br />";
                                                                         }
                                                                     }
-                                                                } ?>
+                                                                }
+                                                                ?>
                                                             Transaction code: <strong> <?php echo $code; ?></strong><br>
                                                         </p>
                                                     </td>
@@ -3217,21 +3230,23 @@ function getInvoiceReceipt($verification_body, $payment_array){
                               </thead>
                               <tbody>
                               <?php
-                                    if($payment_array->metadata){
-                                        echo '<div class="address">' . $payment->email .'</div>';
-                                        $fixedmetadata = $payment_array->metadata;
-                                        $nmeta = json_decode($fixedmetadata);
-                                        $increment = 1;
-                                        foreach ($nmeta as $nkey => $nvalue) {
-                                            if($nvalue->variable_name == 'Plan') continue;
-                                            echo '<tr>';
-                                            echo '<td class="no">' . $increment++ . '</td>';
-                                            echo '<td class="text-left"><h3>' . ($nvalue->variable_name == 'emf-currency' ? 'Currency' : $nvalue->display_name ). '</h3></td>';
-                                            echo '<td class="unit">' . $nvalue->value .'</td>';
-                                            echo '</tr>';
-                                        }
+                                if($payment_array->metadata){
+                                    echo '<div class="address">' . $payment->email .'</div>';
+                                    $fixedmetadata = $payment_array->metadata;
+                                    $nmeta = json_decode($fixedmetadata);
+                                    $increment = 1;
+                                    foreach ($nmeta as $nkey => $nvalue) {
+                                        if($nvalue->variable_name == 'Plan') continue;
+                                        // Skip if 'hidden' is in the display_name
+                                        if(stripos($nvalue->display_name, 'hidden') !== false) continue;
+                                        echo '<tr>';
+                                        echo '<td class="no">' . $increment++ . '</td>';
+                                        echo '<td class="text-left"><h3>' . ($nvalue->variable_name == 'emf-currency' ? 'Currency' : $nvalue->display_name ). '</h3></td>';
+                                        echo '<td class="unit">' . $nvalue->value .'</td>';
+                                        echo '</tr>';
                                     }
-                                  ?>
+                                }
+                                ?>
                               </tbody>
                            </table>
 
@@ -3240,7 +3255,7 @@ function getInvoiceReceipt($verification_body, $payment_array){
                                  <tr>
                                     <td colspan="2"></td>
                                     <td colspan="2">AMOUNT RECEIVED</td>
-                                    <td><?php echo $currency . ' ' . number_format($verification_body['result']['settledAmount'] / 100) ?></td>
+                                    <td><?php echo $currency . ' ' . number_format($verification_body['result']['amount'] / 100) ?></td>
                                  </tr>
                               </tfoot>
                            </table>
