@@ -347,24 +347,31 @@ function em_application_tech_send_receipt($id, $currency, $amount, $name, $email
     <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;margin-top:8px;margin-bottom:16px">
         Amount <strong> : <?php echo $currency.' '.number_format($amount); ?></strong><br>
         Email <strong> :  <?php echo $user_email; ?></strong><br>
-    <?php
-    $new = json_decode($metadata);
-    if (array_key_exists("0", $new)) {
+        <?php
+$new = json_decode($metadata);
+if (array_key_exists("0", $new)) {
+    foreach ($new as $key => $item) {
+        if ($item->variable_name == 'Plan' || strpos($item->variable_name, 'hidden') !== false) {
+            continue;
+        }
+        if ($item->type == 'text') {
+            echo $item->display_name . "<strong>  :" . $item->value . "</strong><br>";
+        } else {
+            echo $item->display_name . "<strong>  : <a target='_blank' href='" . $item->value . "'>link</a></strong><br>";
+        }
+    }
+} else {
+    $text = '';
+    if (count((array)$new) > 0) {
         foreach ($new as $key => $item) {
-            if ($item->type == 'text') {
-                echo $item->display_name."<strong>  :".$item->value."</strong><br>";
-            } else {
-                echo $item->display_name."<strong>  : <a target='_blank' href='".$item->value."'>link</a></strong><br>";
+            if ($key == 'Plan' || strpos($key, 'hidden') !== false) {
+                continue;
             }
+            echo $key . "<strong>  :" . $item . "</strong><br />";
         }
-    } else {
-        $text = '';
-        if (count($new) > 0) {
-            foreach ($new as $key => $item) {
-                echo $key."<strong>  :".$item."</strong><br />";
-            }
-        }
-    } ?>
+    }
+}
+?>
         Transaction code: <strong> <?php echo $code; ?></strong><br>
     </p>
     </td>
