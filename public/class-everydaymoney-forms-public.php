@@ -2835,158 +2835,252 @@ add_action('template_redirect', function () {
 });
 
 
-function everydaymoney_form_callback() {
-    // Verify the transactionRef against the external API
-    $message = null;
-    $result = null;
-    $payment_array = null;
-    $redirect = null;
-    $verification_body = null;
-    if (isset($_GET["transactionRef"])) {
-        $transactionRef = $_GET["transactionRef"];
-        $mode = esc_attr(get_option('emMode', 'test'));
+// function everydaymoney_form_callback() {
+//     // Verify the transactionRef against the external API
+//     $message = null;
+//     $result = null;
+//     $payment_array = null;
+//     $redirect = null;
+//     $verification_body = null;
+//     if (isset($_GET["transactionRef"])) {
+//         $transactionRef = $_GET["transactionRef"];
+//         $mode = esc_attr(get_option('emMode', 'test'));
 
-        global $wpdb;
-        $table = $wpdb->prefix . EM_APPLICATION_TECH_TABLE;
+//         global $wpdb;
+//         $table = $wpdb->prefix . EM_APPLICATION_TECH_TABLE;
 
-        if ($mode == 'test') {
-            $chargeUrl = "https://em-api-staging.everydaymoney.app/payment/business/charge";
-        } else {
-            $chargeUrl = "https://em-api-prod.everydaymoney.app/payment/business/charge";
-        }
+//         if ($mode == 'test') {
+//             $chargeUrl = "https://em-api-staging.everydaymoney.app/payment/business/charge";
+//         } else {
+//             $chargeUrl = "https://em-api-prod.everydaymoney.app/payment/business/charge";
+//         }
 
-        // TODO: Set PublicKey in Header
-        $verification_response = wp_remote_get($chargeUrl . "?transactionRef=" . $transactionRef);
+//         // TODO: Set PublicKey in Header
+//         $verification_response = wp_remote_get($chargeUrl . "?transactionRef=" . $transactionRef);
 
-        if (!is_wp_error($verification_response)) {
-            $verification_body = json_decode(wp_remote_retrieve_body($verification_response), true);
+//         if (!is_wp_error($verification_response)) {
+//             $verification_body = json_decode(wp_remote_retrieve_body($verification_response), true);
 
-            if (!$verification_body["isError"]) {
-                // Transaction is verified, update the order status or perform any necessary actions
+//             if (!$verification_body["isError"]) {
+//                 // Transaction is verified, update the order status or perform any necessary actions
 
-                $record = $wpdb->get_results(
-                    $wpdb->prepare(
-                        "SELECT * FROM $table WHERE ourRef = %s AND transactionRef = %s",
-                        $verification_body["result"]["referenceKey"],
-                        $transactionRef
-                    )
-                );                
+//                 $record = $wpdb->get_results(
+//                     $wpdb->prepare(
+//                         "SELECT * FROM $table WHERE ourRef = %s AND transactionRef = %s",
+//                         $verification_body["result"]["referenceKey"],
+//                         $transactionRef
+//                     )
+//                 );                
 
-                if (!empty($record)) {
-                    $payment_array = $record[0];
-                    if($payment_array->paid == 1){
-                        $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
-                        $message = $thankyou;
-                        $result = "success";
-                    }else if($verification_body["result"]['status'] === 'success' || 
-                    $verification_body["result"]['status'] === 'completed' ||
-                    $verification_body["result"]['status'] === 'sent'){
-                        // $amount = get_post_meta($payment_array->post_id, '_amount', true);
-                        // $recur = get_post_meta($payment_array->post_id, '_recur', true);
-                        // $currency = get_post_meta($payment_array->post_id, '_currency', true);
-                        // $txncharge = get_post_meta($payment_array->post_id, '_txncharge', true);
-                        $redirect = get_post_meta($payment_array->post_id, '_redirect', true);
-                        // $minimum = get_post_meta($payment_array->post_id, '_minimum', true);
-                        $usevariableamount = get_post_meta($payment_array->post_id, '_usevariableamount', true);
-                        // $variableamount = get_post_meta($payment_array->post_id, '_variableamount', true);
-                        $usequantity = get_post_meta($payment_array->post_id, '_usequantity', true);
-                        if ($usequantity == "yes") {
-                            $quantity = $_POST["quantity"];
-                            $sold = get_post_meta($payment_array->post_id, '_sold', true);
-                            $sold = empty($sold) ? 0 : (int)$sold;
-                            $sold += $quantity;
-                            update_post_meta($payment_array->post_id, '_sold', $sold);
-                        }
+//                 if (!empty($record)) {
+//                     $payment_array = $record[0];
+//                     if($payment_array->paid == 1){
+//                         $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
+//                         $message = $thankyou;
+//                         $result = "success";
+//                     }else if($verification_body["result"]['status'] === 'success' || 
+//                     $verification_body["result"]['status'] === 'completed' ||
+//                     $verification_body["result"]['status'] === 'sent'){
+//                         // $amount = get_post_meta($payment_array->post_id, '_amount', true);
+//                         // $recur = get_post_meta($payment_array->post_id, '_recur', true);
+//                         // $currency = get_post_meta($payment_array->post_id, '_currency', true);
+//                         // $txncharge = get_post_meta($payment_array->post_id, '_txncharge', true);
+//                         $redirect = get_post_meta($payment_array->post_id, '_redirect', true);
+//                         // $minimum = get_post_meta($payment_array->post_id, '_minimum', true);
+//                         $usevariableamount = get_post_meta($payment_array->post_id, '_usevariableamount', true);
+//                         // $variableamount = get_post_meta($payment_array->post_id, '_variableamount', true);
+//                         $usequantity = get_post_meta($payment_array->post_id, '_usequantity', true);
+//                         if ($usequantity == "yes") {
+//                             $quantity = $_POST["quantity"];
+//                             $sold = get_post_meta($payment_array->post_id, '_sold', true);
+//                             $sold = empty($sold) ? 0 : (int)$sold;
+//                             $sold += $quantity;
+//                             update_post_meta($payment_array->post_id, '_sold', $sold);
+//                         }
 
-                        $amount_paid = $verification_body["result"]["amount"] / 100;
-                        $settledAmount = $verification_body["result"]["settledAmount"] / 100;
-                        $paid_at = $verification_body["result"]["paidAt"];
-                        $recur = null; // You should define $recur somewhere
-                        $amount = $payment_array->amount; // You should define $amount somewhere
-                        // $usevariableamount = 1; // You should define $usevariableamount somewhere
+//                         $amount_paid = $verification_body["result"]["amount"] / 100;
+//                         $settledAmount = $verification_body["result"]["settledAmount"] / 100;
+//                         $paid_at = $verification_body["result"]["paidAt"];
+//                         $recur = null; // You should define $recur somewhere
+//                         $amount = $payment_array->amount; // You should define $amount somewhere
+//                         // $usevariableamount = 1; // You should define $usevariableamount somewhere
 
-                        if ($recur == 'optional' || $recur == 'plan') {
-                            $wpdb->update($table, array('paid' => 1, 'amount' => $amount_paid, 'paid_at' => $paid_at), array('settledAmount' => $settledAmount));
-                            $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
-                            $message = $thankyou;
-                            $result = "success";
-                        } else {
-                            if ($amount == 0 || $usevariableamount == 1) {
-                                $wpdb->update($table, array('paid' => 1, 'amount' => $amount_paid, 'paid_at' => $paid_at, 'settledAmount' => $settledAmount), array('id' => $payment_array->id));
-                                $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
-                                $message = $thankyou;
-                                $result = "success";
-                            } else {
-                                $usequantity = get_post_meta($payment_array->post_id, '_usequantity', true);
+//                         if ($recur == 'optional' || $recur == 'plan') {
+//                             $wpdb->update($table, array('paid' => 1, 'amount' => $amount_paid, 'paid_at' => $paid_at), array('settledAmount' => $settledAmount));
+//                             $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
+//                             $message = $thankyou;
+//                             $result = "success";
+//                         } else {
+//                             if ($amount == 0 || $usevariableamount == 1) {
+//                                 $wpdb->update($table, array('paid' => 1, 'amount' => $amount_paid, 'paid_at' => $paid_at, 'settledAmount' => $settledAmount), array('id' => $payment_array->id));
+//                                 $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
+//                                 $message = $thankyou;
+//                                 $result = "success";
+//                             } else {
+//                                 $usequantity = get_post_meta($payment_array->post_id, '_usequantity', true);
 
-                                if ($usequantity == 'no') {
-                                    $oamount = (int)str_replace(' ', '', $amount);
-                                } else {
-                                    $quantity = $_POST["quantity"];
-                                    $unitamount = (int)str_replace(' ', '', get_post_meta($payment_array->post_id, '_amount', true));
-                                    $oamount = $quantity * $unitamount;
-                                }
+//                                 if ($usequantity == 'no') {
+//                                     $oamount = (int)str_replace(' ', '', $amount);
+//                                 } else {
+//                                     $quantity = $_POST["quantity"];
+//                                     $unitamount = (int)str_replace(' ', '', get_post_meta($payment_array->post_id, '_amount', true));
+//                                     $oamount = $quantity * $unitamount;
+//                                 }
 
-                                if ($oamount != $amount_paid) {
-                                    $message = "Invalid amount Paid. Amount required is " . 'NGN' . "<b>" . number_format($oamount) . "</b>";
-                                    $result = "failed";
-                                } else {
-                                    $wpdb->update($table, array('paid' => 1, 'paid_at' => $paid_at, 'settledAmount' => $settledAmount), array('id' => $payment_array->id));
-                                    $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
-                                    $message = $thankyou;
-                                    $result = "success";
-                                }
-                            }
-                        }
-                        if($result == "success"){
-                            $sendreceipt = get_post_meta($payment_array->post_id, '_sendreceipt', true);
-                            if ($sendreceipt == 'yes') {
-                                $decoded = json_decode($payment_array->metadata);
-                                $fullname = $decoded[1]->value;
-                                em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $verification_body["result"]["referenceKey"], $payment_array->metadata, $transactionRef);
-                                em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
-                            }
-                        }
-                    } else {
-                        $message = "Payment is still pending";
-                        $result = "failure";
-                        if(isset($_GET['cancel'])){
-                            return wp_redirect('/');
-                        }
-                        if ($mode == 'test') {
-                            return wp_redirect("https://di0yljy1dvrl5.cloudfront.net/?methods=bank_transfer,card&transactionRef=" . $transactionRef);
-                        }else{
-                            return wp_redirect("https://checkout.everydaymoney.app?methods=bank_transfer,card&transactionRef=" . $transactionRef);
-                        }
+//                                 if ($oamount != $amount_paid) {
+//                                     $message = "Invalid amount Paid. Amount required is " . 'NGN' . "<b>" . number_format($oamount) . "</b>";
+//                                     $result = "failed";
+//                                 } else {
+//                                     $wpdb->update($table, array('paid' => 1, 'paid_at' => $paid_at, 'settledAmount' => $settledAmount), array('id' => $payment_array->id));
+//                                     $thankyou = get_post_meta($payment_array->post_id, '_successmsg', true);
+//                                     $message = $thankyou;
+//                                     $result = "success";
+//                                 }
+//                             }
+//                         }
+//                         if($result == "success"){
+//                             $sendreceipt = get_post_meta($payment_array->post_id, '_sendreceipt', true);
+//                             if ($sendreceipt == 'yes') {
+//                                 $decoded = json_decode($payment_array->metadata);
+//                                 $fullname = $decoded[1]->value;
+//                                 em_application_tech_send_receipt($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $verification_body["result"]["referenceKey"], $payment_array->metadata, $transactionRef);
+//                                 em_application_tech_send_receipt_owner($payment_array->post_id, $currency, $amount_paid, $fullname, $payment_array->email, $transactionRef, $payment_array->metadata);
+//                             }
+//                         }
+//                     } else {
+//                         $message = "Payment is still pending";
+//                         $result = "failure";
+//                         if(isset($_GET['cancel'])){
+//                             return wp_redirect('/');
+//                         }
+//                         if ($mode == 'test') {
+//                             return wp_redirect("https://di0yljy1dvrl5.cloudfront.net/?methods=bank_transfer,card&transactionRef=" . $transactionRef);
+//                         }else{
+//                             return wp_redirect("https://checkout.everydaymoney.app?methods=bank_transfer,card&transactionRef=" . $transactionRef);
+//                         }
                         
-                    }
-                }
-            }
+//                     }
+//                 }
+//             }
+//         }
+//         // Render HTML based on $result === "success" or "failure"
+//         if ($result === "success") {
+//             if($redirect){
+//                 return wp_redirect($redirect);
+//             }else{
+//                 getInvoiceReceipt($verification_body, $payment_array, $message);
+//             }
+//         } elseif ($result === "failure") {
+//             // Render failure HTML
+//             echo '<div class="failure-message">' . $message . '</div>';
+//         } else {
+//             echo '<div class="failure-message">Something went wrong, please contact support or try again later</div>';
+//             try{
+//                 $pluginlog = plugin_dir_path(__FILE__).'debug.log';
+//                 $message = json_encode($verification_response).PHP_EOL;
+//                 error_log($message, 3, $pluginlog);
+//             }catch(Exception $e){
+//                 // Nothing
+//             }
+//         }
+//     }else{
+//         // TODO: Render: Payment Cancelled
+//     }
+// }
+function everydaymoney_form_callback() {
+    if (!isset($_GET["transactionRef"])) {
+        return wp_send_json_error("Transaction reference not provided", 400);
+    }
+
+    $transactionRef = sanitize_text_field($_GET["transactionRef"]);
+    $mode = esc_attr(get_option('emMode', 'test'));
+    $chargeUrl = ($mode == 'test') 
+        ? "https://em-api-staging.everydaymoney.app/payment/business/charge" 
+        : "https://em-api-prod.everydaymoney.app/payment/business/charge";
+
+    $verification_response = wp_remote_get($chargeUrl . "?transactionRef=" . $transactionRef);
+
+    if (is_wp_error($verification_response)) {
+        error_log("EverydayMoney API Error: " . $verification_response->get_error_message());
+        return wp_send_json_error("Error verifying transaction", 500);
+    }
+
+    $verification_body = json_decode(wp_remote_retrieve_body($verification_response), true);
+
+    if (!$verification_body || !isset($verification_body["isError"])) {
+        error_log("EverydayMoney Invalid Response: " . wp_json_encode($verification_body));
+        return wp_send_json_error("Invalid response from payment gateway", 500);
+    }
+
+    if ($verification_body["isError"]) {
+        error_log("EverydayMoney Transaction Error: " . wp_json_encode($verification_body));
+        return wp_send_json_error("Transaction verification failed", 400);
+    }
+
+    global $wpdb;
+    $table = $wpdb->prefix . EM_APPLICATION_TECH_TABLE;
+    $record = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM $table WHERE ourRef = %s AND transactionRef = %s",
+        $verification_body["result"]["referenceKey"],
+        $transactionRef
+    ));
+
+    if (!$record) {
+        error_log("EverydayMoney Record Not Found: " . $transactionRef);
+        return wp_send_json_error("Transaction record not found", 404);
+    }
+
+    if ($record->paid == 1) {
+        $message = get_post_meta($record->post_id, '_successmsg', true);
+        return wp_send_json_success(['message' => $message]);
+    }
+
+    $transaction_status = $verification_body["result"]['status'];
+    if (!in_array($transaction_status, ['success', 'completed', 'sent'])) {
+        if (isset($_GET['cancel'])) {
+            return wp_redirect(home_url());
         }
-        // Render HTML based on $result === "success" or "failure"
-        if ($result === "success") {
-            if($redirect){
-                return wp_redirect($redirect);
-            }else{
-                getInvoiceReceipt($verification_body, $payment_array, $message);
-            }
-        } elseif ($result === "failure") {
-            // Render failure HTML
-            echo '<div class="failure-message">' . $message . '</div>';
-        } else {
-            echo '<div class="failure-message">Something went wrong, please contact support or try again later</div>';
-            try{
-                $pluginlog = plugin_dir_path(__FILE__).'debug.log';
-                $message = json_encode($verification_response).PHP_EOL;
-                error_log($message, 3, $pluginlog);
-            }catch(Exception $e){
-                // Nothing
-            }
-        }
-    }else{
-        // TODO: Render: Payment Cancelled
+        $redirect_url = ($mode == 'test')
+            ? "https://di0yljy1dvrl5.cloudfront.net/?methods=bank_transfer,card&transactionRef=" . $transactionRef
+            : "https://checkout.everydaymoney.app?methods=bank_transfer,card&transactionRef=" . $transactionRef;
+        return wp_redirect($redirect_url);
+    }
+
+    $amount_paid = $verification_body["result"]["amount"] / 100;
+    $settledAmount = $verification_body["result"]["settledAmount"] / 100;
+    $paid_at = $verification_body["result"]["paidAt"];
+
+    $update_result = $wpdb->update(
+        $table, 
+        ['paid' => 1, 'amount' => $amount_paid, 'paid_at' => $paid_at, 'settledAmount' => $settledAmount],
+        ['id' => $record->id]
+    );
+
+    if ($update_result === false) {
+        error_log("EverydayMoney DB Update Error: " . $wpdb->last_error);
+        return wp_send_json_error("Error updating transaction record", 500);
+    }
+
+    $thankyou = get_post_meta($record->post_id, '_successmsg', true);
+    $redirect = get_post_meta($record->post_id, '_redirect', true);
+
+    // Handle receipt sending
+    $sendreceipt = get_post_meta($record->post_id, '_sendreceipt', true);
+    if ($sendreceipt == 'yes') {
+        $decoded = json_decode($record->metadata);
+        $fullname = $decoded[1]->value;
+        $currency = get_post_meta($record->post_id, '_currency', true);
+        em_application_tech_send_receipt($record->post_id, $currency, $amount_paid, $fullname, $record->email, $verification_body["result"]["referenceKey"], $record->metadata, $transactionRef);
+        em_application_tech_send_receipt_owner($record->post_id, $currency, $amount_paid, $fullname, $record->email, $transactionRef, $record->metadata);
+    }
+
+    if ($redirect) {
+        return wp_redirect($redirect);
+    } else {
+        return getInvoiceReceipt($verification_body, $record, $thankyou);
     }
 }
+
 
 function getInvoiceReceipt($verification_body, $payment_array){  
     $currency = get_post_meta($payment_array->post_id, '_currency', true);
